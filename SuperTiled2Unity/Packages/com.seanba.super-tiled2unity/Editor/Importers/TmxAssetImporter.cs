@@ -464,9 +464,17 @@ namespace SuperTiled2Unity.Editor
                 {
                     // Replace the super object with the instantiated prefab
                     var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+
                     instance.transform.SetParent(so.transform.parent);
-                    instance.transform.position = so.transform.position + prefab.transform.localPosition;
-                    instance.transform.rotation = so.transform.rotation;
+                    instance.transform.SetPositionAndRotation(so.transform.position + prefab.transform.localPosition, so.transform.rotation);
+
+                    // Keep collision info if the prefab has a box collider
+                    if (instance.TryGetComponent<BoxCollider2D>(out var collider2D))
+                    {
+                        var size = new Vector2(so.m_Width, so.m_Height) / PixelsPerUnit;
+                        collider2D.size = size;
+                        collider2D.offset = new Vector2(size.x, -size.y) / 2;
+                    }
 
                     // Keep the name from Tiled.
                     instance.name = so.gameObject.name;
